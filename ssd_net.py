@@ -94,15 +94,15 @@ class SSD(nn.Module):
         # Confidence post-processing:
         # 1: (N, num_prior_bbox * n_classes, H, W) to (N, H*W*num_prior_bbox, n_classes) = (N, num_priors, num_classes)
         #    where H*W*num_prior_bbox = num_priors
-        #conf = conf.permute(0, 2, 3, 1).contiguous()
-        #num_batch = conf.shape[0]
-        #c_channels = int(conf.shape[1]*conf.shape[2]*conf.shape[3] / self.num_classes)
-        #conf = conf.view(num_batch, c_channels, self.num_classes)
+        conf = conf.permute(0, 2, 3, 1).contiguous()
+        num_batch = conf.shape[0]
+        c_channels = int(conf.shape[1]*conf.shape[2]*conf.shape[3] / self.num_classes)
+        conf = conf.view(num_batch, c_channels, self.num_classes)
 
         # Bounding Box loc and size post-processing
         # 1: (N, num_prior_bbox*4, H, W) to (N, num_priors, 4)
-        #loc = loc.permute(0, 2, 3, 1).contiguous()
-        #loc = loc.view(num_batch, c_channels, 4)
+        loc = loc.permute(0, 2, 3, 1).contiguous()
+        loc = loc.view(num_batch, c_channels, 4)
 
         return conf, loc
 
@@ -124,8 +124,8 @@ class SSD(nn.Module):
 
         # Todo: forward the 'y' to additional layers for extracting coarse features
 
-        #confidences = torch.cat(confidence_list, 1)
-        #locations = torch.cat(loc_list, 1)
+        confidences = torch.cat(confidence_list, 1)
+        locations = torch.cat(loc_list, 1)
 
         # [Debug] check the output
         assert confidence.dim() == 3  # should be (N, num_priors, num_classes)
