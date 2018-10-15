@@ -205,6 +205,7 @@ def nms_bbox(bbox_loc, bbox_confid_scores, overlap_threshold=0.5, prob_threshold
     :param bbox_loc: bounding box loc and size, dim: (num_priors, 4)
     :param bbox_confid_scores: bounding box confidence probabilities, dim: (num_priors, num_classes)
     :param overlap_threshold: the overlap threshold for filtering out outliers
+    :param prob_threshold: filter out values
     :return: selected bounding box with classes
     """
 
@@ -218,6 +219,7 @@ def nms_bbox(bbox_loc, bbox_confid_scores, overlap_threshold=0.5, prob_threshold
     sel_bbox = []
 
     # Todo: implement nms for filtering out the unnecessary bounding boxes
+
     #convert bboxes from center format to corner format
     bbox_loc = center2corner(bbox_loc)
     num_classes = bbox_confid_scores.shape[1]

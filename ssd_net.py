@@ -47,7 +47,7 @@ class SSD(nn.Module):
                 nn.Conv2d(in_channels=128, out_channels=256, kernel_size=3, stride=1, padding=1),
                 nn.ReLU()
             ),
-            # TODO: implement two more layers.
+            # TODO: implement two more layers. Done
         ])
 
         # Bounding box offset regressor
@@ -58,7 +58,7 @@ class SSD(nn.Module):
             nn.Conv2d(in_channels=512, out_channels=num_prior_bbox * 4, kernel_size=3, padding=1),
             nn.Conv2d(in_channels=256, out_channels=num_prior_bbox * 4, kernel_size=3, padding=1),
             nn.Conv2d(in_channels=256, out_channels=num_prior_bbox * 4, kernel_size=3, padding=1)
-            # TODO: implement remaining layers.
+            # TODO: implement remaining layers. Done
         ])
 
         # Bounding box classification confidence for each label
@@ -68,10 +68,43 @@ class SSD(nn.Module):
             nn.Conv2d(in_channels=512, out_channels=num_prior_bbox * num_classes, kernel_size=3, padding=1),
             nn.Conv2d(in_channels=256, out_channels=num_prior_bbox * num_classes, kernel_size=3, padding=1),
             nn.Conv2d(in_channels=256, out_channels=num_prior_bbox * num_classes, kernel_size=3, padding=1)            
-# TODO: implement remaining layers.
+        # TODO: implement remaining layers. Done
         ])
 
-        # Todo: load the pre-trained model for self.base_net, it will increase the accuracy by fine-tuning
+
+        # Todo: load the pre-trained model for self.base_net, it will increase the accuracy by fine-tuning Done
+
+        pretrained_model = torch.load("/home/vishal/PMCSVisualComputing/SEM_1/VC_1/Project/vehicle_detection/pretrained/mobienetv2.pth")
+
+
+        # new = list(pretrained_model.items())
+        my_model= self.base_net.state_dict()
+
+        # 1. filter out unnecessary keys
+        #print(my_model)
+        #print(pretrained_model.items())
+
+        pretrained_model = {k: v for k, v in pretrained_model.items() if k in my_model}
+        # 2. overwrite entries in the existing state dict
+        print(pretrained_model)
+        print(my_model)
+        my_model.update(pretrained_model)
+        print(my_model)
+        # 3. load the new state dict
+        self.base_net.load_state_dict(my_model)
+
+        print(self.base_net)
+        print(self.additional_feat_extractor)
+
+        # print(my_model_kvpair,pretrained_model)
+        # count = 0
+        # for key, value in my_model_kvpair.items():
+        #     layer_name, weights = new[count]
+        #     my_model_kvpair[key] = weights
+        #     count += 1
+
+        #self.base_net.load_state_dict(pretrained_model)
+
 
         def init_with_xavier(m):
             if isinstance(m, nn.Conv2d):
@@ -118,12 +151,18 @@ class SSD(nn.Module):
         confidence_list.append(confidence)
         loc_list.append(loc)
 
-        # Todo: implement run the backbone network from [11 to 13] and compute the corresponding bbox loc and confidence
+        # Todo: implement run the backbone network from [11 to 13] and compute the corresponding bbox loc and confidence Done
+        y = module_util.forward_from(self.base_net.conv_layers,self.base_output_layer_indices[0] + 1,self.base_output_layer_indices[1] + 1, y)
+        confidence, loc = self.feature_to_bbbox(self.loc_regressor[0], self.classifier[0], y)
         confidence_list.append(confidence)
         loc_list.append(loc)
+        print(y)
 
-        # Todo: forward the 'y' to additional layers for extracting coarse features
+        # Todo: forward the 'y' to additional layers for extracting coarse features Done
 
+        y = module_util.forward_from(self.base_net.additional_feat_extractor , 0,3, y)
+        confidence, loc = self.feature_to_bbbox(self.loc_regressor[0], self.classifier[0], y)
+        print(y)
         confidences = torch.cat(confidence_list, 1)
         locations = torch.cat(loc_list, 1)
 
@@ -135,9 +174,6 @@ class SSD(nn.Module):
 
         if not self.training:
             # If in testing/evaluating mode, normalize the output with Softmax
-            confidences = F.softmax(confidences, dim=1)
+            confidences = F.softmax(confidences, dim=2)
 
         return confidences, locations
-
-
-

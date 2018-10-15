@@ -3,7 +3,7 @@ import mobilenet
 import bbox_loss
 import cityscape_dataset
 import bbox_helper
-import module_util
+import util.module_util
 import os
 from glob import glob
 import numpy as np
@@ -89,3 +89,4 @@ if __name__ == '__main__':
     random.shuffle(train_datalist)
     train_validate_items = len(train_datalist)
     print(train_validate_items)
+    cityscape_dataset.CityScapeDataset(train_datalist)

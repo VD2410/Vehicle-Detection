@@ -99,12 +99,16 @@ class CityScapeDataset(Dataset):
         # 5. Do the matching prior and generate ground-truth labels as well as the boxes
         bbox_tensor, bbox_label_tensor = match_priors(self.prior_bound_boxes, self.bound_boxes, self.labels,
                                                       iou_threshold=0.5)
-        # [DEBUG] check the output.
-        # assert isinstance(bbox_label_tensor, torch.Tensor)
-        # assert isinstance(bbox_tensor, torch.Tensor)
-        # assert bbox_tensor.dim() == 2
-        # assert bbox_tensor.shape[1] == 4
-        # assert bbox_label_tensor.dim() == 1
-        # assert bbox_label_tensor.shape[0] == bbox_tensor.shape[0]
+        #[DEBUG] check the output.
+        assert isinstance(bbox_label_tensor, torch.Tensor)
+        assert isinstance(bbox_tensor, torch.Tensor)
+        assert bbox_tensor.dim() == 2
+        assert bbox_tensor.shape[1] == 4
+        assert bbox_label_tensor.dim() == 1
+        assert bbox_label_tensor.shape[0] == bbox_tensor.shape[0]
 
         return img_tensor, bbox_tensor, bbox_label_tensor
+
+
+
+
