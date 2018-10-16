@@ -45,14 +45,11 @@ class CityScapeDataset(Dataset):
                             'aspect_ratio': (1.0, 1 / 2, 1 / 3, 2.0, 3.0)}
                            ]
         self.prior_bound_boxes = generate_prior_bboxes(prior_layer_cfg)
-        print(dataset_list)
+
         # Pre-process parameters:
         #  Normalize: (I-self.mean)/self.std
         self.mean = np.asarray((127, 127, 127))
         self.std = 128.0
-
-    def get_prior_bbox(self):
-        return self.prior_bound_boxes
 
     def __len__(self):
         return len(self.dataset_list)
@@ -70,13 +67,15 @@ class CityScapeDataset(Dataset):
         # 3. Convert the bounding box from corner form (left-top, right-bottom): [(x,y), (x+w, y+h)] to
         #    center form: [(center_x, center_y, w, h)]
         # 4. Normalize the bounding box position value from 0 to 1
+
         item = self.dataset_list[idx]
-        self.image_path = item['path']
-        self.labels = np.asarray(item['labels'])
-        self.labels = torch.Tensor(self.labels)
+        #print(item['image_path'])
+        self.image_path = item['image_path']
+        self.labels = torch.Tensor(np.asarray(item['labels']))
         self.bound_boxes = item['bound_boxes']
-        self.bound_boxes = torch.Tensor(np.asarray(item['bound_boxes'], dtype=np.float32))
-        print(self.bound_boxes.shape)
+        self.bound_boxes = torch.Tensor(np.asarray(item['bound_boxes']))
+        #print(self.bound_boxes.shape)
+
 
         img = Image.open(self.image_path)
 

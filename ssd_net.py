@@ -86,15 +86,13 @@ class SSD(nn.Module):
 
         pretrained_model = {k: v for k, v in pretrained_model.items() if k in my_model}
         # 2. overwrite entries in the existing state dict
-        print(pretrained_model)
-        print(my_model)
         my_model.update(pretrained_model)
-        print(my_model)
+        # print(my_model)
         # 3. load the new state dict
         self.base_net.load_state_dict(my_model)
 
-        print(self.base_net)
-        print(self.additional_feat_extractor)
+        # print(self.base_net)
+        # print(self.additional_feat_extractor)
 
         # print(my_model_kvpair,pretrained_model)
         # count = 0
@@ -156,13 +154,13 @@ class SSD(nn.Module):
         confidence, loc = self.feature_to_bbbox(self.loc_regressor[0], self.classifier[0], y)
         confidence_list.append(confidence)
         loc_list.append(loc)
-        print(y)
+        # print(y)
 
         # Todo: forward the 'y' to additional layers for extracting coarse features Done
 
         y = module_util.forward_from(self.base_net.additional_feat_extractor , 0,3, y)
         confidence, loc = self.feature_to_bbbox(self.loc_regressor[0], self.classifier[0], y)
-        print(y)
+        # print(y)
         confidences = torch.cat(confidence_list, 1)
         locations = torch.cat(loc_list, 1)
 
