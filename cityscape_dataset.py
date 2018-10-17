@@ -71,6 +71,7 @@ class CityScapeDataset(Dataset):
         item = self.dataset_list[idx]
         #print(item['image_path'])
         self.image_path = item['image_path']
+        print(item['labels'])
         self.labels = torch.Tensor(np.asarray(item['labels']))
         self.bound_boxes = item['bound_boxes']
         self.bound_boxes = torch.Tensor(np.asarray(item['bound_boxes']))

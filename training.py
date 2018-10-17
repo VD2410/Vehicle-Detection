@@ -119,9 +119,9 @@ class Training():
 
         train_dataset = cityscape_dataset.CityScapeDataset(train_sets)
         train_data_loader = torch.utils.data.DataLoader(train_dataset,
-                                                        batch_size=10,
+                                                        batch_size=20,
                                                         shuffle=True,
-                                                        num_workers=6)
+                                                        num_workers=0)
         print('Total training items', len(train_dataset), ', Total training mini-batches in one epoch:',
               len(train_data_loader))
 
@@ -130,9 +130,9 @@ class Training():
 
         valid_set = cityscape_dataset.CityScapeDataset(valid_sets)
         valid_data_loader = torch.utils.data.DataLoader(valid_set,
-                                                        batch_size=10,
+                                                        batch_size=20,
                                                         shuffle=True,
-                                                        num_workers=6)
+                                                        num_workers=0)
         print('Total validation set:', len(valid_set), ', Total training mini-batches in one epoch:',
               len(valid_data_loader))
 
