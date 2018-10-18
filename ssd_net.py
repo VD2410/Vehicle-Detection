@@ -74,7 +74,7 @@ class SSD(nn.Module):
 
         # Todo: load the pre-trained model for self.base_net, it will increase the accuracy by fine-tuning Done
 
-        pretrained_model = torch.load("/home/vishal/PMCSVisualComputing/SEM_1/VC_1/Project/vehicle_detection/pretrained/mobienetv2.pth")
+        pretrained_model = torch.load("./pretrained/mobienetv2.pth")
 
 
         # new = list(pretrained_model.items())

@@ -118,8 +118,9 @@ def iou(a: torch.Tensor, b: torch.Tensor):
     # TODO: implement IoU of two bounding box
     # area (A union B) = area(A) + area(B) = area(A iou_intersect B)
     inter = iou_intersect(a, b)
-    a_area = (a[:, 2] - a[:, 0]) * (a[:, 3] - a[:, 1]).unsqueeze(1).expand_as(inter)
-    b_area = (b[:, 2] - a[:, 0]) * (a[:, 3] - a[:, 1]).unsqueeze(0).expand_as(inter)
+    a_area = ((a[:, 2] - a[:, 0]) * (a[:, 3] - a[:, 1])).unsqueeze(1).expand_as(inter)
+    print(a_area.shape)
+    b_area = (b[:, 2] - b[:, 0]) * (b[:, 3] - b[:, 1]).unsqueeze(0).expand_as(inter)
     union = a_area + b_area - inter
     iou = inter / union
 
@@ -159,7 +160,8 @@ def match_priors(prior_bboxes: torch.Tensor, gt_bboxes: torch.Tensor, gt_labels:
     #
     # matched_boxes = gt_bboxes[max_idx]
 
-    best_prior, best_prior_idx = gt_iou.max(1, keepdim=True)
+    print(gt_iou)
+    best_gt, best_gt_idx = gt_iou.max(1, keepdim=True)
 
 
     best_prior, best_prior_idx = gt_iou.max(0, keepdim=True)
@@ -167,12 +169,12 @@ def match_priors(prior_bboxes: torch.Tensor, gt_bboxes: torch.Tensor, gt_labels:
 
     best_prior_idx.squeeze_(0)
     best_prior.squeeze_(0)
-    best_prior_idx.squeeze_(1)
-    best_prior.squeeze_(1)
+    best_gt_idx.squeeze_(1)
+    best_gt.squeeze_(1)
     best_prior_idx.index_fill_(0, best_prior_idx, 2)
 
-    for j in range(best_prior_idx.size(0)):
-        best_prior_idx[best_prior_idx[j]] = j
+    for j in range(best_gt_idx.size(0)):
+        best_prior_idx[best_gt_idx[j]] = j
     matched_boxes = gt_bboxes[best_prior_idx]
     variances = [0.1, 0.2]
     cent_x_y = (matched_boxes[:, :2] + matched_boxes[:, 2:]) / 2 - prior_bboxes[:, :2]

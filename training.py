@@ -92,7 +92,7 @@ class Training():
             train_datalist.append({'image_path': image_path.rstrip(), 'labels': labels, 'bound_boxes': bound_boxes})
 
         random.shuffle(train_datalist)
-        print(train_datalist)
+        #print(train_datalist)
         n_train_sets = 0.8 * len(train_datalist)
 
         train_sets = train_datalist[: int(n_train_sets)]
@@ -148,7 +148,7 @@ class Training():
 
         max_epochs = 1
         itr = 0
-
+        print(train_data_loader)
         for epoch_idx in range(0, max_epochs):
             for train_batch_idx, (train_input, train_label) in enumerate(train_data_loader):
 
