@@ -7,7 +7,7 @@ from mobilenet import MobileNet
 
 class SSD(nn.Module):
     
-    def __init__(self, num_classes):
+    def __init__(self, num_classes = 4):
         super(SSD, self).__init__()
         self.num_classes = num_classes
 
@@ -57,6 +57,7 @@ class SSD(nn.Module):
             nn.Conv2d(in_channels=1024, out_channels=num_prior_bbox * 4, kernel_size=3, padding=1),
             nn.Conv2d(in_channels=512, out_channels=num_prior_bbox * 4, kernel_size=3, padding=1),
             nn.Conv2d(in_channels=256, out_channels=num_prior_bbox * 4, kernel_size=3, padding=1),
+            nn.Conv2d(in_channels=256, out_channels=num_prior_bbox * 4, kernel_size=3, padding=1),
             nn.Conv2d(in_channels=256, out_channels=num_prior_bbox * 4, kernel_size=3, padding=1)
             # TODO: implement remaining layers. Done
         ])
@@ -67,7 +68,8 @@ class SSD(nn.Module):
             nn.Conv2d(in_channels=1024, out_channels=num_prior_bbox * num_classes, kernel_size=3, padding=1),
             nn.Conv2d(in_channels=512, out_channels=num_prior_bbox * num_classes, kernel_size=3, padding=1),
             nn.Conv2d(in_channels=256, out_channels=num_prior_bbox * num_classes, kernel_size=3, padding=1),
-            nn.Conv2d(in_channels=256, out_channels=num_prior_bbox * num_classes, kernel_size=3, padding=1)            
+            nn.Conv2d(in_channels=256, out_channels=num_prior_bbox * num_classes, kernel_size=3, padding=1),
+            nn.Conv2d(in_channels=256, out_channels=num_prior_bbox * num_classes, kernel_size=3, padding=1)
         # TODO: implement remaining layers. Done
         ])
 
@@ -144,34 +146,41 @@ class SSD(nn.Module):
 
         # Run the backbone network from [0 to 11, and fetch the bbox class confidence
         # as well as position and size
-        y = module_util.forward_from(self.base_net.conv_layers, 0, self.base_output_layer_indices[0]+1, input)
+        y = module_util.forward_from(self.base_net.conv_layers, 0, self.base_output_layer_indices[0], input)
+        print(y.shape)
         confidence, loc = self.feature_to_bbbox(self.loc_regressor[0], self.classifier[0], y)
         confidence_list.append(confidence)
         loc_list.append(loc)
 
         # Todo: implement run the backbone network from [11 to 13] and compute the corresponding bbox loc and confidence Done
-        y = module_util.forward_from(self.base_net.conv_layers,self.base_output_layer_indices[0] + 1,self.base_output_layer_indices[1] + 1, y)
-        confidence, loc = self.feature_to_bbbox(self.loc_regressor[0], self.classifier[0], y)
+        y = module_util.forward_from(self.base_net.conv_layers,self.base_output_layer_indices[0],self.base_output_layer_indices[1], y)
+        print(y.shape)
+        confidence, loc = self.feature_to_bbbox(self.loc_regressor[1], self.classifier[1], y)
         confidence_list.append(confidence)
         loc_list.append(loc)
         # print(y)
 
         # Todo: forward the 'y' to additional layers for extracting coarse features Done
 
-        y = module_util.forward_from(self.base_net.additional_feat_extractor , 0,3, y)
-        confidence, loc = self.feature_to_bbbox(self.loc_regressor[0], self.classifier[0], y)
+        for i in range(0,3):
+            y = module_util.forward_from(self.additional_feat_extractor, i,i+1, y)
+
+            confidence, loc = self.feature_to_bbbox(self.loc_regressor[i+2], self.classifier[i+2], y)
+
+            confidence_list.append(confidence)
+            loc_list.append(loc)
         # print(y)
         confidences = torch.cat(confidence_list, 1)
         locations = torch.cat(loc_list, 1)
-
+        print(confidences.shape,locations.shape)
         # [Debug] check the output
-        assert confidence.dim() == 3  # should be (N, num_priors, num_classes)
+        assert confidences.dim() == 3  # should be (N, num_priors, num_classes)
         assert locations.dim() == 3   # should be (N, num_priors, 4)
-        assert confidence.shape[1] == locations.shape[1]
+        assert confidences.shape[1] == locations.shape[1]
         assert locations.shape[2] == 4
 
         if not self.training:
             # If in testing/evaluating mode, normalize the output with Softmax
             confidences = F.softmax(confidences, dim=2)
-
+        print(confidences.shape)
         return confidences, locations

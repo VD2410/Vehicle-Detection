@@ -12,6 +12,7 @@ def hard_negative_mining(predicted_prob, gt_label, neg_pos_ratio=3.0):
     :param neg_pos_ratio:
     :return:
     """
+    print("pridicted :",predicted_prob.shape)
     pos_flag = gt_label > 0                                        # 0 = negative label
 
     # Sort the negative samples

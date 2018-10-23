@@ -118,7 +118,7 @@ class Training():
 
 
         train_dataset = cityscape_dataset.CityScapeDataset(train_sets)
-        train_data_loader = torch.utils.data.DataLoader(train_dataset,
+        train_data_loader: object = torch.utils.data.DataLoader(train_dataset,
                                                         batch_size=20,
                                                         shuffle=True,
                                                         num_workers=0)
@@ -136,7 +136,7 @@ class Training():
         print('Total validation set:', len(valid_set), ', Total training mini-batches in one epoch:',
               len(valid_data_loader))
 
-        ssd = ssd_net.SSD(4).cuda()
+        ssd = ssd_net.SSD().cuda()
         #print(ssd)
 
         criterion = bbox_loss.MultiboxLoss((0.1,0.2))
@@ -148,9 +148,9 @@ class Training():
 
         max_epochs = 1
         itr = 0
-        print(train_data_loader)
+        #print(train_data_loader)
         for epoch_idx in range(0, max_epochs):
-            for train_batch_idx, (train_input, train_label) in enumerate(train_data_loader):
+            for img_tensor, train_input, train_label in train_data_loader:
 
                 itr += 1
 
@@ -158,7 +158,7 @@ class Training():
                 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
                 ssd = ssd.to(device)
                 # print(device)
-                for features, targets in train_data_loader:
+                for img,features, targets in train_data_loader:
                     features = features.to(device)
                     targets = targets.to(device)
 
@@ -169,9 +169,11 @@ class Training():
                 optimizer.zero_grad()
 
                 # Forward
-                train_input = Variable(train_input.cuda())  # use Variable(*) to allow gradient flow
+
+                train_input = Variable(img_tensor.cuda())  # use Variable(*) to allow gradient flow
+                #print(train_input.dim())
                 confidence , train_out = ssd.forward(train_input)  # forward once
-                print(train_out)
+                #print(train_out)
                 # compute loss
                 train_label = Variable(train_label.cuda().float())
                 loss = criterion.forward(confidence,train_out,train_label,train_input)
@@ -184,7 +186,7 @@ class Training():
 
                 train_losses.append((itr,loss.item()))
 
-                if train_batch_idx % 200 == 0:
+                if itr % 200 == 0:
                     print('Epoch: %d Itr: %d Loss: %f' % (epoch_idx, itr, loss.item()))
 
         train_losses = np.asarray(train_losses)

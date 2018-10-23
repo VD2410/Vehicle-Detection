@@ -77,7 +77,7 @@ def generate_prior_bboxes(prior_layer_cfg):
     prior_bound_boxes = torch.tensor(prior_bound_boxes)
     prior_bound_boxes = torch.clamp(prior_bound_boxes, 0.0, 1.0)
     num_priors = prior_bound_boxes.shape[0]
-    print(num_priors)
+    #print(num_priors)
 
     # [DEBUG] check the output shape
     assert prior_bound_boxes.dim() == 2
@@ -119,7 +119,7 @@ def iou(a: torch.Tensor, b: torch.Tensor):
     # area (A union B) = area(A) + area(B) = area(A iou_intersect B)
     inter = iou_intersect(a, b)
     a_area = ((a[:, 2] - a[:, 0]) * (a[:, 3] - a[:, 1])).unsqueeze(1).expand_as(inter)
-    print(a_area.shape)
+    #print(a_area.shape)
     b_area = (b[:, 2] - b[:, 0]) * (b[:, 3] - b[:, 1]).unsqueeze(0).expand_as(inter)
     union = a_area + b_area - inter
     iou = inter / union
@@ -149,7 +149,7 @@ def match_priors(prior_bboxes: torch.Tensor, gt_bboxes: torch.Tensor, gt_labels:
     assert gt_labels.shape[0] == gt_bboxes.shape[0]
     assert prior_bboxes.dim() == 2
     assert prior_bboxes.shape[1] == 4
-
+    #print(prior_bboxes)
     gt_iou = iou(gt_bboxes, center2corner(prior_bboxes))
 
     # iou_val, max_idx = gt_iou.max(0, keepdim=True)
@@ -160,7 +160,7 @@ def match_priors(prior_bboxes: torch.Tensor, gt_bboxes: torch.Tensor, gt_labels:
     #
     # matched_boxes = gt_bboxes[max_idx]
 
-    print(gt_iou)
+    #print(gt_iou)
     best_gt, best_gt_idx = gt_iou.max(1, keepdim=True)
 
 
@@ -192,6 +192,7 @@ def match_priors(prior_bboxes: torch.Tensor, gt_bboxes: torch.Tensor, gt_labels:
     assert matched_boxes.shape[1] == 4
     assert matched_labels.dim() == 1
     assert matched_labels.shape[0] == matched_boxes.shape[0]
+    print(matched_boxes.shape)
 
     return matched_boxes, matched_labels
 
